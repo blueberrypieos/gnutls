@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 The Blueberry Pie OS Authors
+gnutls: copyright-file-contains-full-gpl-license
+gnutls: copyright-not-using-common-license-for-lgpl
+gnutls: old-fsf-address-in-copyright-file
+gnutls: initial-upload-closes-no-bugs [usr/share/doc/gnutls/changelog.Debian.gz:1]
+gnutls: executable-not-elf-or-script [usr/lib/libgnutls.30.dylib]
+gnutls: executable-not-elf-or-script [usr/lib/libgnutlsxx.30.dylib]
+gnutls: executable-not-elf-or-script [usr/bin/certtool]
+gnutls: executable-not-elf-or-script [usr/bin/gnutls-cli]
+gnutls: executable-not-elf-or-script [usr/bin/gnutls-cli-debug]
+gnutls: executable-not-elf-or-script [usr/bin/gnutls-serv]
+gnutls: executable-not-elf-or-script [usr/bin/ocsptool]
+gnutls: executable-not-elf-or-script [usr/bin/psktool]
+gnutls: executable-not-elf-or-script [usr/bin/srptool]
+gnutls: no-manual-page [usr/bin/certtool]
+gnutls: no-manual-page [usr/bin/gnutls-cli]
+gnutls: no-manual-page [usr/bin/gnutls-cli-debug]
+gnutls: no-manual-page [usr/bin/gnutls-serv]
+gnutls: no-manual-page [usr/bin/ocsptool]
+gnutls: no-manual-page [usr/bin/psktool]
+gnutls: no-manual-page [usr/bin/srptool]

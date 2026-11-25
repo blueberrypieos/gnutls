@@ -1,0 +1,63 @@
+Description: Read the AArch64 CPU features from sysctl on Darwin
+ discover_caps() finds the AES, PMULL and SHA instructions through
+ getauxval() on Linux and sysctl on OpenBSD. On Darwin it sets no bits,
+ so the accelerated code is never used. The kernel reports each feature
+ as hw.optional.arm.FEAT_*, and AdvSIMD as hw.optional.arm.AdvSIMD.
+Author: The Blueberry Pie OS Authors
+Forwarded: not-needed
+Last-Update: 2026-11-05
+---
+--- a/lib/accelerated/aarch64/aarch64-common.c
++++ b/lib/accelerated/aarch64/aarch64-common.c
+@@ -1,4 +1,5 @@
+ /*
++ * Modified 2026-11-05: Read the CPU features from sysctl on Darwin (LGPL-2.1 section 2(b)).
+  * Copyright (C) 2016 Red Hat, Inc.
+  *
+  * Author: Nikos Mavrogiannopoulos
+@@ -45,6 +46,8 @@
+ # include <sys/sysctl.h>
+ # include <machine/cpu.h>
+ # include <machine/armreg.h>
++#elif defined(__APPLE__)
++# include <sys/sysctl.h>
+ #endif
+ 
+ #if defined(__GNUC__)
+@@ -80,6 +83,16 @@ static void capabilities_to_cpuid(unsign
+ #define HWCAP_SHA512 (1 << 21)
+ #endif
+ 
++#if !defined(USE_AUXVAL) && defined(__APPLE__)
++static int has_feature(const char *name)
++{
++	int value = 0;
++	size_t len = sizeof(value);
++
++	return sysctlbyname(name, &value, &len, NULL, 0) == 0 && value != 0;
++}
++#endif
++
+ static void discover_caps(unsigned int *caps)
+ {
+ #ifdef USE_AUXVAL
+@@ -116,6 +129,19 @@ static void discover_caps(unsigned int *
+ 		*caps |= ARMV8_SHA256;
+ 	if (ID_AA64ISAR0_SHA2(isar0) >= ID_AA64ISAR0_SHA2_512)
+ 		*caps |= ARMV8_SHA512;
++#elif defined(__APPLE__)
++	if (has_feature("hw.optional.arm.AdvSIMD"))
++		*caps |= ARMV7_NEON;
++	if (has_feature("hw.optional.arm.FEAT_AES"))
++		*caps |= ARMV8_AES;
++	if (has_feature("hw.optional.arm.FEAT_PMULL"))
++		*caps |= ARMV8_PMULL;
++	if (has_feature("hw.optional.arm.FEAT_SHA1"))
++		*caps |= ARMV8_SHA1;
++	if (has_feature("hw.optional.arm.FEAT_SHA256"))
++		*caps |= ARMV8_SHA256;
++	if (has_feature("hw.optional.arm.FEAT_SHA512"))
++		*caps |= ARMV8_SHA512;
+ #endif
+ }
+ 

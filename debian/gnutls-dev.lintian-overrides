@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 The Blueberry Pie OS Authors
+gnutls-dev: copyright-file-contains-full-gpl-license
+gnutls-dev: copyright-not-using-common-license-for-lgpl
+gnutls-dev: old-fsf-address-in-copyright-file
+gnutls-dev: pkg-config-unavailable-for-cross-compilation [usr/lib/pkgconfig/gnutls.pc]
+gnutls-dev: no-changelog

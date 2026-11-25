@@ -1,0 +1,5 @@
+gnutls (3.7.11+ds1-1) blueberry-pie-os; urgency=medium
+
+  * GnuTLS 3.7.11
+
+ -- Maxwell <maxwell@blueberrypieos.com>  Wed, 04 Nov 2026 04:01:09 +0000

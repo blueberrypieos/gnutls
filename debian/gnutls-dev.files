@@ -1,0 +1,5 @@
+usr/include/*
+usr/lib/pkgconfig/*
+usr/lib/libgnutls.dylib
+usr/lib/libgnutlsxx.dylib
+usr/share/lintian/overrides/gnutls-dev

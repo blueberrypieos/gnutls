@@ -1,0 +1,15 @@
+ABOUT-NLS
+AUTHORS
+ChangeLog
+INSTALL.md
+LICENSE
+NEWS
+README.md
+THANKS
+build-aux/mdate-sh
+build-aux/texinfo.tex
+lib/README
+lib/accelerated/aarch64/README
+lib/accelerated/x86/license.txt
+m4/gtk-doc.m4
+m4/guile.m4

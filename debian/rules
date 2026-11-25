@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 The Blueberry Pie OS Authors
+
+ifneq ($(shell pwd -P | LC_ALL=C awk '!/^[A-Za-z0-9\/._+~-]+$$/ { bad = 1 } END { print ((bad || NR != 1) ? "bad" : "ok") }'),ok)
+$(error debian/rules: the path of the tree may have only letters, digits and /._+~-: $(CURDIR))
+endif
+ifneq ($(CURDIR),$(shell pwd -P))
+$(error debian/rules: make does not see the path of the tree as the shell does)
+endif
+ifneq ($(shell test -L debian -o -L debian/build -o -L debian/files.new && echo link; \
+	test -d debian/build && find debian/build -mindepth 1 -maxdepth 1 -type l; \
+	test -d debian/build/pie && find debian/build/pie -mindepth 1 -type l \( -xtype d -o \
+		\( ! -path debian/build/pie/bin/install_name_tool ! -path debian/build/pie/bin/otool \) \)),)
+$(error debian/rules: debian, debian/build or something rules.mk writes in it is a symlink)
+endif
+
+include /usr/share/pietoolchain/rules.mk
+
+SRC := $(W)/src
+export PIE_REPRO_SOURCE := $(SRC)
+
+BINUTILS := $(TOOLCHAIN)/prefix/bin/aarch64-apple-darwin
+CONFIGURE_FLAGS := --host=aarch64-apple-darwin --build=$(shell uname -m)-pc-linux-gnu \
+	--prefix=/usr --libdir=/usr/lib --enable-shared --disable-static --enable-cxx \
+	--disable-doc --disable-manpages --disable-nls \
+	--disable-tests --disable-full-test-suite --disable-guile --disable-libdane \
+	--without-p11-kit --without-tpm --without-tpm2 --without-idn --without-zlib \
+	--with-included-libtasn1 --with-included-unistring \
+	--with-default-trust-store-file=/etc/ssl/cert.pem
+
+$(OBJ)/.configured:
+	rm -rf $(SRC) && mkdir -p $(SRC) $(OBJ)
+	cd $(SRCROOT) && find . -mindepth 1 -maxdepth 1 ! -name debian ! -name .pc ! -name .git -exec cp -a -t $(SRC) -- {} +
+	cd $(SRC) && find . -type l -exec sh -c 's=$$(pwd -P); for l; do case "$$(realpath -m -- "$$l")" in "$$s"|"$$s"/*) ;; *) echo "debian/rules: $$l leads outside the copy" >&2; exit 1;; esac; done' sh {} +
+	cd $(SRC) && AUTOPOINT=true autoreconf -fi > $(OBJ)/autoreconf.log 2>&1 || { cat $(OBJ)/autoreconf.log; exit 1; }
+	cd $(OBJ) && ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes \
+		CC=$(CC) CXX=$(CXX) CFLAGS="$(BASE_CFLAGS)" CCASFLAGS="$(BASE_CFLAGS) -mcpu=generic+aes" CXXFLAGS="$(BASE_CFLAGS)" \
+		LDFLAGS="$(BASE_LDFLAGS)" AR=$(BINUTILS)-ar RANLIB=$(BINUTILS)-ranlib NM=$(NM) \
+		STRIP=$(STRIP) LD=$(BINUTILS)-ld OTOOL=$(BINUTILS)-otool LIPO=$(BINUTILS)-lipo \
+		NMEDIT=$(BINUTILS)-nmedit PKG_CONFIG=$(PIE_PKG_CONFIG) \
+		$(SRC)/configure $(CONFIGURE_FLAGS) > configure.log
+	touch $@
+
+$(OBJ)/.built: $(OBJ)/.configured
+	$(MAKE) -C $(OBJ)
+	touch $@
+
+install: $(OBJ)/.built
+	$(MAKE) -C $(OBJ) DESTDIR=$(ROOT) install
+	find $(ROOT)/usr/lib -name '*.la' -delete
+
+	set -e; for p in gnutls gnutls-dev; do \
+		install -Dm644 $(SRCROOT)/debian/$$p.lintian-overrides $(ROOT)/usr/share/lintian/overrides/$$p; \
+	done
+	install -d -m755 $(ROOT)/usr/share/doc/gnutls
+	gzip -n -9 -c $(SRCROOT)/debian/changelog > $(ROOT)/usr/share/doc/gnutls/changelog.Debian.gz
+	chmod 644 $(ROOT)/usr/share/doc/gnutls/changelog.Debian.gz
+
+.PHONY: install

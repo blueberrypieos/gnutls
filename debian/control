@@ -1,0 +1,25 @@
+Source: gnutls
+Section: community/libs
+Priority: optional
+Maintainer: Maxwell <maxwell@blueberrypieos.com>
+Build-Depends: pietoolchain-host (>= 0.3.0), pietoolchain-sdk (>= 0.3.1), autoconf, automake, libtool, nettle-dev (>= 3.10.2), libgmp-dev (>= 6.3.0)
+Standards-Version: 4.7.3
+Homepage: https://www.gnutls.org/
+Vcs-Git: https://github.com/blueberrypieos/gnutls.git -b blueberry-pie-os/latest
+Vcs-Browser: https://github.com/blueberrypieos/gnutls
+Rules-Requires-Root: no
+
+Package: gnutls
+Architecture: darwin-arm64
+Depends: libhogweed (>= 3.10.2), libnettle (>= 3.10.2), libgmp (>= 6.3.0), libcxx, libsystem
+Description: TLS cryptographic libraries and command-line tools
+ GnuTLS provides TLS and DTLS protocols, certificate handling, and
+ command-line tools for secure connections and certificate management.
+
+Package: gnutls-dev
+Section: community/libdevel
+Architecture: darwin-arm64
+Depends: gnutls (= ${binary:Version}), nettle-dev (>= 3.10.2), libgmp-dev (>= 6.3.0)
+Description: TLS cryptographic libraries: development files
+ Headers, shared library links and pkg-config files for building
+ C and C++ programs against GnuTLS.
